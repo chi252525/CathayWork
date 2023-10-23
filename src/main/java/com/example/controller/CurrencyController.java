@@ -34,20 +34,21 @@ public class CurrencyController {
 
     // 修改幣別資料
     @PutMapping("/{id}")
-    public Currency updateCurrency(@PathVariable Long id, @RequestBody Currency currency) {
-        Currency existingCurrency = currencyService.findById(id).orElse(null);
+    public Currency updateCurrency( @RequestBody Currency currency) {
+        Currency existingCurrency = currencyService.findByCode(currency.getCode());
         if (existingCurrency != null) {
             existingCurrency.setCode(currency.getCode());
             existingCurrency.setName(currency.getName());
+            existingCurrency.setPrice(currency.getPrice());
             return currencyService.save(existingCurrency);
         }
         return null;
     }
 
     //刪除
-    @DeleteMapping("/{id}")
-    public void deleteCurrency(@PathVariable Long id) {
-        currencyService.deleteById(id);
+    @DeleteMapping("/{code}")
+    public void deleteCurrency(@PathVariable String code) {
+        currencyService.deleteByCode(code);
     }
 
 }

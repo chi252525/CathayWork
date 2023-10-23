@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.dto.Bpi;
 import com.example.dto.CurrencyInfo;
+import com.example.dto.OriginPriceInfo;
 import com.example.dto.PriceInfo;
 import com.example.service.CurrencyService;
 import com.example.service.PriceInfoService;
@@ -32,10 +33,10 @@ public class PriceInfoController {
     private PriceInfoService priceInfoService;
 
     //    呼叫 coindesk API，解析其下行內容與資料轉換，並實作新的 API。
-    @GetMapping(value = "/transfer", produces = "application/json")
-    public ResponseEntity getTransfer() {
+    @GetMapping(value = "/info", produces = "application/json")
+    public ResponseEntity getPriceInfo() {
         try {
-            PriceInfo priceInfo = priceInfoService.getCoinDeskAPI();
+            OriginPriceInfo priceInfo = priceInfoService.getCoinDeskAPI();
             return ResponseEntity.ok(priceInfo);
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -47,10 +48,10 @@ public class PriceInfoController {
     //    此新 API 提供：
     //    A. 更新時間（時間格式範例：1990/01/01 00:00:00）。
     //    B. 幣別相關資訊（幣別，幣別中文名稱，以及匯率）。
-    @GetMapping(value = "/info", produces = "application/json")
-    public ResponseEntity getPriceInfo() {
+    @GetMapping(value = "/transfer", produces = "application/json")
+    public ResponseEntity getTransfer() {
         try {
-            PriceInfo priceInfo = priceInfoService.getCoinDeskAPI();
+            PriceInfo priceInfo = priceInfoService.getCoinDeskTransferAPI();
             String updateTime = priceInfo.getTime().getUpdated();
             //時間格式範例：1990/01/01 00:00:00
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, uuuu HH:mm:ss z", Locale.ENGLISH);

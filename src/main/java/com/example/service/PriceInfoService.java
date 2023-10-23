@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.dto.Bpi;
+import com.example.dto.OriginPriceInfo;
 import com.example.dto.PriceInfo;
 import com.example.dto.Time;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,8 +20,21 @@ import java.util.Map;
 
 @Service
 public class PriceInfoService {
+    public OriginPriceInfo getCoinDeskAPI() {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet("https://api.coindesk.com/v1/bpi/currentprice.json");
+        try {
+            CloseableHttpResponse response = httpClient.execute(httpGet);
+            String json = EntityUtils.toString(response.getEntity());
+            ObjectMapper objectMapper = new ObjectMapper();
+            OriginPriceInfo priceInfo = objectMapper.readValue(json, OriginPriceInfo.class);
+            return priceInfo;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-    public PriceInfo getCoinDeskAPI() {
+    public PriceInfo getCoinDeskTransferAPI() {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet("https://api.coindesk.com/v1/bpi/currentprice.json");
         try {

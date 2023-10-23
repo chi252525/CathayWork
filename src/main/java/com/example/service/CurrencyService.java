@@ -30,7 +30,10 @@ public class CurrencyService {
         return repository.findById(id);
     }
 
-    public void deleteById(Long id) {
-        repository.deleteById(id);
+    public void deleteByCode(String code) {
+        Currency currency = repository.findByCode(code);
+        if (currency != null) {
+            repository.delete(currency);
+        }
     }
 }
