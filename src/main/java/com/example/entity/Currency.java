@@ -1,10 +1,12 @@
 package com.example.entity;
 
 
+import lombok.Data;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 
-
+@Data
 @Entity
 public class Currency {
 
@@ -27,58 +29,5 @@ public class Currency {
         this.name = name;
         this.price = price;
     }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Currency currency = (Currency) o;
-
-        return code.equals(currency.code);
-    }
-
-    @Override
-    public int hashCode() {
-        return code.hashCode();
-    }
-
-
 }
 
