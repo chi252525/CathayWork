@@ -36,8 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @SpringBootTest
@@ -138,7 +137,7 @@ class DemoApplicationTests {
 
     //5. 測試呼叫 coindesk API，並顯示其內容。
     @Test
-    public void testInfoAPI() throws Exception {
+    public void testInfoAPIOK() throws Exception {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet("https://api.coindesk.com/v1/bpi/currentprice.json");
         CloseableHttpResponse response = httpClient.execute(httpGet);
@@ -150,6 +149,20 @@ class DemoApplicationTests {
                 .andExpect(content().json(json));
     }
 
+    //    測試呼叫資料轉換的API，並顯示其內容。
+    @Test
+    public void testTransferAPIOK() throws Exception {
+        List<Currency> currencies = getCoinDeskAPI();
+        for (Coin coin : Coin.values()) {
+            Currency currency = currencies.stream().filter(e -> coin.name().equals(e.getCode())).findFirst().orElse(null);
+            mockMvc.perform(get("/price/transfer/" + coin.name())
+                            .contentType("application/json"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("currencyCode").value(currency.getCode()))
+                    .andExpect(jsonPath("currencyName").value(currency.getName()))
+                    .andExpect(jsonPath("price").value(currency.getPrice()));
+        }
+    }
 
     private List<Currency> getCoinDeskAPI() {
         List<Currency> currencyList = new ArrayList<>();

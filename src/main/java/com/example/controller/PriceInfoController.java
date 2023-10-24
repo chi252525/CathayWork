@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,8 +49,8 @@ public class PriceInfoController {
     //    此新 API 提供：
     //    A. 更新時間（時間格式範例：1990/01/01 00:00:00）。
     //    B. 幣別相關資訊（幣別，幣別中文名稱，以及匯率）。
-    @GetMapping(value = "/transfer", produces = "application/json")
-    public ResponseEntity getTransfer() {
+    @GetMapping(value = "/transfer/{code}", produces = "application/json")
+    public ResponseEntity getTransferCoinDeskAPI(@PathVariable String code) {
         try {
             PriceInfo priceInfo = priceInfoService.getCoinDeskTransferAPI();
             String updateTime = priceInfo.getTime().getUpdated();
@@ -60,7 +61,10 @@ public class PriceInfoController {
             updateTime = dateTime.atZone(ZoneId.of("UTC")).withZoneSameInstant(ZoneId.of("Asia/Taipei"))
                     .format(outputFormatter);
             Map<String, Bpi> bpiMap = priceInfo.getBpi();
-            Bpi usdBpi = bpiMap.get("USD");
+            Bpi usdBpi = bpiMap.get(code);
+            if (usdBpi == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
             String currencyCode = usdBpi.getCode();
             String currencyName = usdBpi.getDescription();
             BigDecimal price = usdBpi.getRate();
