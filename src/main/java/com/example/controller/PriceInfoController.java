@@ -2,16 +2,8 @@ package com.example.controller;
 
 import com.example.dto.Bpi;
 import com.example.dto.CurrencyInfo;
-import com.example.dto.OriginPriceInfo;
 import com.example.dto.PriceInfo;
-import com.example.service.CurrencyService;
 import com.example.service.PriceInfoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +29,7 @@ public class PriceInfoController {
     @GetMapping(value = "/info", produces = "application/json")
     public ResponseEntity getPriceInfo() {
         try {
-            OriginPriceInfo priceInfo = priceInfoService.getCoinDeskAPI();
+            PriceInfo priceInfo = priceInfoService.getCoinDeskAPI();
             return ResponseEntity.ok(priceInfo);
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -67,7 +59,7 @@ public class PriceInfoController {
             }
             String currencyCode = usdBpi.getCode();
             String currencyName = usdBpi.getDescription();
-            BigDecimal price = usdBpi.getRate();
+            BigDecimal price = usdBpi.getRateFloat();
             return ResponseEntity.ok(new CurrencyInfo(updateTime, currencyCode, currencyName, price));
         } catch (RuntimeException e) {
             e.printStackTrace();

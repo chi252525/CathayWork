@@ -18,7 +18,7 @@ public class Currency {
     private String code;
 
     private String name;
-
+    @Column(precision = 10, scale = 4)
     private BigDecimal price;
 
     public Currency() {

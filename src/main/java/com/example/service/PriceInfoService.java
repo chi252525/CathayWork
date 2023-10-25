@@ -1,11 +1,9 @@
 package com.example.service;
 
 import com.example.dto.Bpi;
-import com.example.dto.OriginPriceInfo;
 import com.example.dto.PriceInfo;
 import com.example.dto.Time;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -20,14 +18,14 @@ import java.util.Map;
 
 @Service
 public class PriceInfoService {
-    public OriginPriceInfo getCoinDeskAPI() {
+    public PriceInfo getCoinDeskAPI() {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet("https://api.coindesk.com/v1/bpi/currentprice.json");
         try {
             CloseableHttpResponse response = httpClient.execute(httpGet);
             String json = EntityUtils.toString(response.getEntity());
             ObjectMapper objectMapper = new ObjectMapper();
-            OriginPriceInfo priceInfo = objectMapper.readValue(json, OriginPriceInfo.class);
+            PriceInfo priceInfo = objectMapper.readValue(json, PriceInfo.class);
             return priceInfo;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -68,7 +66,7 @@ public class PriceInfoService {
             Bpi bpiDto = new Bpi();
             bpiDto.setCode((String) bpiData.get("code"));
             bpiDto.setSymbol((String) bpiData.get("symbol"));
-            bpiDto.setRate(new BigDecimal(String.valueOf(bpiData.get("rate")).replaceAll(",", "")));
+            bpiDto.setRate((String) bpiData.get("rate"));
             bpiDto.setDescription((String) bpiData.get("description"));
             bpiDto.setRateFloat(new BigDecimal(String.valueOf(bpiData.get("rate_float"))));
 //            System.out.println(new Gson().toJson(bpiDto));

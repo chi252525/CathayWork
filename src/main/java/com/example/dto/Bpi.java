@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public class Bpi {
     private String code;
     private String symbol;
-    private BigDecimal rate;
+    private String rate;
     private String description;
     @JsonProperty("rate_float")
     private BigDecimal rateFloat;

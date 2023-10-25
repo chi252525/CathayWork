@@ -63,7 +63,7 @@ class DemoApplicationTests {
         Map<String, Bpi> bpiMap = priceInfo.getBpi();
         for (String coinKey : bpiMap.keySet()) {
             Bpi bpi = bpiMap.get(coinKey);
-            Currency currency = new Currency(coinKey, Coin.valueOf(coinKey).getNameCh(), bpi.getRate());
+            Currency currency = new Currency(coinKey, Coin.valueOf(coinKey).getNameCh(), bpi.getRateFloat());
             repository.save(currency);
         }
         //測試資料是否都有存到資料庫
@@ -167,9 +167,12 @@ class DemoApplicationTests {
         List<Currency> currencyList = new ArrayList<>();
         PriceInfo priceInfo = priceInfoService.getCoinDeskTransferAPI();
         Map<String, Bpi> bpiMap = priceInfo.getBpi();
+        long index = 1;
         for (String coinKey : bpiMap.keySet()) {
             Bpi bpi = bpiMap.get(coinKey);
-            Currency currency = new Currency(coinKey, Coin.valueOf(coinKey).getNameCh(), bpi.getRate());
+            Currency currency = new Currency(coinKey, Coin.valueOf(coinKey).getNameCh(), bpi.getRateFloat());
+            currency.setId(index);
+            index++;
             currencyList.add(currency);
         }
         return currencyList;
