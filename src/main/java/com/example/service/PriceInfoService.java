@@ -3,12 +3,14 @@ package com.example.service;
 import com.example.dto.Bpi;
 import com.example.dto.PriceInfo;
 import com.example.dto.Time;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -18,37 +20,49 @@ import java.util.Map;
 
 @Service
 public class PriceInfoService {
-    public PriceInfo getCoinDeskAPI() {
+
+    @Value("${coinDesk.api.url}")
+    private String coinDeskUrl;
+
+    public String getCoinDeskAPIRsp() {
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet("https://api.coindesk.com/v1/bpi/currentprice.json");
+        HttpGet httpGet = new HttpGet(coinDeskUrl);
         try {
             CloseableHttpResponse response = httpClient.execute(httpGet);
-            String json = EntityUtils.toString(response.getEntity());
-            ObjectMapper objectMapper = new ObjectMapper();
-            PriceInfo priceInfo = objectMapper.readValue(json, PriceInfo.class);
-            return priceInfo;
+            return EntityUtils.toString(response.getEntity());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
     }
 
-    public PriceInfo getCoinDeskTransferAPI() {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet("https://api.coindesk.com/v1/bpi/currentprice.json");
+    public PriceInfo getCoinDeskAPI() {
+        String json = getCoinDeskAPIRsp();
+        ObjectMapper objectMapper = new ObjectMapper();
+        PriceInfo priceInfo = null;
         try {
-            CloseableHttpResponse response = httpClient.execute(httpGet);
-            String json = EntityUtils.toString(response.getEntity());
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> data = mapper.readValue(json, Map.class);
-            Map<String, Object> innerDataTime = (Map<String, Object>) data.get("time");
-            String disclaimer = (String) data.get("disclaimer");
-            String chartName = (String) data.get("chartName");
-            Map<String, Object> bpi = (Map<String, Object>) data.get("bpi");
-            return parseDataToDto(innerDataTime, disclaimer, chartName, bpi);
-        } catch (IOException e) {
+            priceInfo = objectMapper.readValue(json, PriceInfo.class);
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        return priceInfo;
+    }
 
+
+    public PriceInfo getCoinDeskTransferAPI() {
+        String json = getCoinDeskAPIRsp();
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> data = null;
+        try {
+            data = mapper.readValue(json, Map.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        Map<String, Object> innerDataTime = (Map<String, Object>) data.get("time");
+        String disclaimer = (String) data.get("disclaimer");
+        String chartName = (String) data.get("chartName");
+        Map<String, Object> bpi = (Map<String, Object>) data.get("bpi");
+        return parseDataToDto(innerDataTime, disclaimer, chartName, bpi);
     }
 
     private PriceInfo parseDataToDto(Map<String, Object> innerDataTime, String disclaimer, String chartName, Map<String, Object> bpi) {
