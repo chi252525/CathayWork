@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-
+@SuppressWarnings("unchecked")
 @Service
 public class PriceInfoService {
 
@@ -25,9 +25,8 @@ public class PriceInfoService {
     private String coinDeskUrl;
 
     public String getCoinDeskAPIRsp() {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet(coinDeskUrl);
-        try {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpGet httpGet = new HttpGet(coinDeskUrl);
             CloseableHttpResponse response = httpClient.execute(httpGet);
             return EntityUtils.toString(response.getEntity());
         } catch (IOException e) {
@@ -39,7 +38,7 @@ public class PriceInfoService {
     public PriceInfo getCoinDeskAPI() {
         String json = getCoinDeskAPIRsp();
         ObjectMapper objectMapper = new ObjectMapper();
-        PriceInfo priceInfo = null;
+        PriceInfo priceInfo;
         try {
             priceInfo = objectMapper.readValue(json, PriceInfo.class);
         } catch (JsonProcessingException e) {
@@ -52,17 +51,16 @@ public class PriceInfoService {
     public PriceInfo getCoinDeskTransferAPI() {
         String json = getCoinDeskAPIRsp();
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> data = null;
         try {
-            data = mapper.readValue(json, Map.class);
+            Map<String, Object> data = mapper.readValue(json, Map.class);
+            HashMap<String, Object> innerDataTime = (HashMap<String, Object>) data.get("time");
+            String disclaimer = (String) data.get("disclaimer");
+            String chartName = (String) data.get("chartName");
+            Map<String, Object> bpi = (Map<String, Object>) data.get("bpi");
+            return parseDataToDto(innerDataTime, disclaimer, chartName, bpi);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        Map<String, Object> innerDataTime = (Map<String, Object>) data.get("time");
-        String disclaimer = (String) data.get("disclaimer");
-        String chartName = (String) data.get("chartName");
-        Map<String, Object> bpi = (Map<String, Object>) data.get("bpi");
-        return parseDataToDto(innerDataTime, disclaimer, chartName, bpi);
     }
 
     private PriceInfo parseDataToDto(Map<String, Object> innerDataTime, String disclaimer, String chartName, Map<String, Object> bpi) {
@@ -83,11 +81,9 @@ public class PriceInfoService {
             bpiDto.setRate((String) bpiData.get("rate"));
             bpiDto.setDescription((String) bpiData.get("description"));
             bpiDto.setRateFloat(new BigDecimal(String.valueOf(bpiData.get("rate_float"))));
-//            System.out.println(new Gson().toJson(bpiDto));
             bpiMap.put(coinKey, bpiDto);
         }
         priceInfo.setBpi(bpiMap);
-//        System.out.println(new Gson().toJson(priceInfo));
         return priceInfo;
     }
 }
