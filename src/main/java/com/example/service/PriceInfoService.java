@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.client.CoinDeskApiClient;
 import com.example.dto.Bpi;
 import com.example.dto.PriceInfo;
 import com.example.dto.Time;
@@ -10,6 +11,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,16 +19,19 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+
 @SuppressWarnings("unchecked")
 @Service
 public class PriceInfoService {
-
-    @Value("${coinDesk.api.url}")
+    @Value("${coin-desk.api.endpoint}")
     private String coinDeskUrl;
+
+    @Autowired
+    private CoinDeskApiClient client;
 
     public String getCoinDeskAPIRsp() {
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpGet httpGet = new HttpGet(coinDeskUrl);
+            HttpGet httpGet = new HttpGet(coinDeskUrl + CoinDeskApiClient.PATH_GET);
             CloseableHttpResponse response = httpClient.execute(httpGet);
             return EntityUtils.toString(response.getEntity());
         } catch (IOException e) {
@@ -36,15 +41,7 @@ public class PriceInfoService {
     }
 
     public PriceInfo getCoinDeskAPI() {
-        String json = getCoinDeskAPIRsp();
-        ObjectMapper objectMapper = new ObjectMapper();
-        PriceInfo priceInfo;
-        try {
-            priceInfo = objectMapper.readValue(json, PriceInfo.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        return priceInfo;
+        return client.getCoinDeskAPI();
     }
 
 
