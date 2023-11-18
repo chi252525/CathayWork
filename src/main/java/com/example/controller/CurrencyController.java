@@ -1,6 +1,8 @@
 package com.example.controller;
 
 import com.example.entity.Currency;
+import com.example.errormessage.ApiErrMsgCenter;
+import com.example.exception.UncheckedException;
 import com.example.repository.CurrencyRepository;
 import com.example.service.CurrencyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,15 +36,15 @@ public class CurrencyController {
 
     // 修改幣別資料
     @PutMapping("/{id}")
-    public Currency updateCurrency( @RequestBody Currency currency) {
+    public Currency updateCurrency(@RequestBody Currency currency) {
         Currency existingCurrency = currencyService.findByCode(currency.getCode());
-        if (existingCurrency != null) {
-            existingCurrency.setCode(currency.getCode());
-            existingCurrency.setName(currency.getName());
-            existingCurrency.setPrice(currency.getPrice());
-            return currencyService.save(existingCurrency);
+        if (existingCurrency == null) {
+            throw new UncheckedException(ApiErrMsgCenter.CoinDeskApi.ERROR_CURRENCY_ID_NOT_FOUND);
         }
-        return null;
+        existingCurrency.setCode(currency.getCode());
+        existingCurrency.setName(currency.getName());
+        existingCurrency.setPrice(currency.getPrice());
+        return currencyService.save(existingCurrency);
     }
 
     //刪除
